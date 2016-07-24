@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ToDoList</title>
+<style>
+	body{
+		margin: 0;
+		background: #ccc;
+	}
+	ul,li{
+		list-style: none;
+		padding: 0;
+	}
+	.nav{
+		width: 100%;
+		height: 50px;
+		background: #444;
+	}
+	.navs{
+		width: 600px;
+		height: 100%;
+		margin: 0 auto;
+	}
+	.nav h2{
+		color: #fff;
+		margin: 0;
+		font-size: 30px;
+		line-height: 50px;
+		font-weight: bold;
+		display: inline-block;
+	}
+	.nav input{
+		float: right;
+		width: 350px;
+		height: 28px;
+		border: 0;
+		box-shadow: 0 0 5px #000 inset;
+		margin-top: 11px;
+		border-radius: 6px;
+	}
+	.content{
+		width: 600px;
+		height: auto;
+		margin:0 auto;
+	}
+	.content h3{
+		font-size: 32px;
+	}
+	.now,.nowed{
+		width: 100%;
+		height: auto;
+		position: relative;
+	}
+	.now>span,.nowed>span{
+		width: 18px;
+		height: 24px;
+		background: #E6E6FA;
+		border-radius: 18px;
+		position: absolute;
+		right: 10px;
+		text-align: center;
+		line-height: 24px;
+		top: 10px;
+	}
+	.now li,.nowed li{
+		position: relative;
+		font-size: 25px;
+		line-height: 30px;
+		background: #fff;
+		margin-top: 10px;
+		box-sizing:border-box;
+		border-left: 5px solid #629A9C;
+		border-radius: 5px;
+	}
+	.nowed li{
+		opacity: .6;
+	}
+	.now li p,.nowed li p{
+		display: inline-block;
+		margin: 0;
+	}
+	.now li>span,.nowed li>span{
+		width: 18px;
+		height: 18px;
+		color: #fff;
+		/*box-sizing:border-box;*/
+		border: 6px double #FFF;
+    	background: #CCC;
+    	border-radius: 50%;
+		position: absolute;
+		right: 6px;
+		text-align: center;
+		line-height: 18px;
+		top: 1px;
+		cursor: pointer;
+	}
+	.now li>input,.nowed li>input{
+		width: 22px;
+		height: 22px;
+	}
+</style>
+</head>
+<body>
+	<div class="nav">
+		<div class="navs">
+			<h2>ToDolist</h2>
+			<input type="text" placeholder="输入你的事项" name="require required">
+		</div>
+	</div>
+	<div class="content">
+		<div class="now">
+			<h3>正在进行</h3>
+			<span>0</span>
+			<ul>
+				<!-- <li>
+					<input type="checkbox">:第一件事
+					<span>-</span>
+				</li> -->
+			</ul>
+		</div>
+		<div class="nowed">
+			<h3>已经完成</h3>
+			<span>0</span>
+			<ul>
+				<!-- <li>
+					<input type="checkbox">:第一件事
+					<span>-</span>
+				</li> -->				
+			</ul>
+		</div>
+	</div>
+</body>
+<script>
+	var navinput=document.querySelector(".navs>input");
+	var nowul=document.querySelector(".now>ul");
+	var nowedul=document.querySelector(".nowed>ul");
+	var nowspan=document.querySelector(".now span");
+	var nowedspan=document.querySelector(".nowed span");
+	document.onkeydown=function(e){
+		var ev=e||window.event;
+		if(ev.keyCode==13){
+			if(navinput.value.length==0){
+				alert("请输入内容");
+			}else{
+				var data=getData(); 				
+				data.push({
+					'title':navinput.value,
+					'status':false
+				});				
+				navinput.value='';
+				saveData(data);
+				reload();
+			}
+		}
+	}
+
+	function changeData(i,type){
+		var data=getData();
+		if(type==false){
+			data[i].status=true;
+			saveData(data);
+		}else{
+			data[i].status=false;
+			saveData(data);			
+		}
+		reload();
+	}
+	function changep(i,txt){
+		var data=getData();
+		data[i].title=txt;
+		saveData(data);
+		reload();
+	}
+	function deldata(i){
+		var data=getData();
+		data.splice(i,1);
+		saveData(data);
+		reload();
+		if(data.length==0){
+			 localStorage.removeItem('todus');
+		}
+	}
+
+	function getData(){
+		var data=JSON.parse(localStorage.getItem("todus"));
+		return data||[];
+	}
+	function saveData(dat){
+		var data=JSON.stringify(dat);
+		localStorage.setItem("todus",data);
+	}
+	reload();
+	function reload(){
+		var data=getData();
+		var nowhtml='',
+			nowedhtml='',
+			nownum=0,
+			nowednum=0;
+		for(var i=0;i<data.length;i++){
+			if(data[i].status==false){
+				var str="<li><input type='checkbox' class='inputli' onclick=changeData("+i+",false)><p contenteditable=true onblur=changep("+i+",this.innerHTML)>"+data[i].title+"</p><span onclick=deldata("+i+")>-</span></li>";
+				nownum++;
+				nowhtml+=str;
+			}else{
+				var str="<li><input type='checkbox' class='inputli' checked  onclick=changeData("+i+",true)><p contenteditable=true onblur=changep("+i+",this.innerHTML)>"+data[i].title+"</p><span onclick=deldata("+i+")>-</span></li>";
+				nowednum++;
+				nowedhtml+=str;
+			}
+		}
+		nowul.innerHTML=nowhtml;
+		nowedul.innerHTML=nowedhtml;
+		nowspan.innerHTML=nownum;
+		nowedspan.innerHTML=nowednum;
+	}
+	// var navinput=document.querySelector(".navs>input");
+	// var nowul=document.querySelector(".now>ul");
+	// var nowedul=document.querySelector(".nowed>ul");
+	// var navspan1=document.querySelector(".now span");
+	// var navspan2=document.querySelector(".nowed span");
+	
+	// var ss=localStorage.getItem('content')?localStorage.getItem('content').split(","):[];
+	// var sss=localStorage.getItem('num')?localStorage.getItem('num').split(","):[];
+
+	// if(localStorage.getItem('content')){
+	// 	var mycon=localStorage.getItem('content').split(",");
+	// 	// var mynum=localStorage.getItem('num').split(",");
+	// 	for(var i=0;i<mycon.length;i++){
+	// 		xinzeng(mycon[i]);						
+	// 	}
+	// 	inputli();
+	// 	spanclick();
+	// }
+
+
+
+	// document.onkeydown=function(e){
+	// 	var ev=e||window.event;
+	// 	if(ev.keyCode==13){
+	// 		if(navinput.value.length==0){
+	// 			alert("请输入内容");
+	// 		}else{
+	// 			xinzeng(navinput.value);				
+	// 			ss.push(navinput.value);
+	// 			localStorage.setItem('content',ss);
+	// 			navinput.value="";
+	// 			console.log(ss);
+	// 			inputli();
+	// 			spanclick()
+	// 		}
+	// 	}
+	// }
+
+
+
+	// function inputli(){
+	// 	var inputli=document.querySelectorAll(".inputli");
+	// 	for(var i=0;i<inputli.length;i++){
+	// 		inputli[i].aa=i;
+	// 		inputli[i].onclick=function(){			
+	// 			if(inputli[this.aa].checked){
+	// 				var a=inputli[this.aa].parentNode;
+	// 				nowedul.appendChild(a);
+	// 				sss.push(this.aa);
+	// 				localStorage.setItem('num',sss);
+	// 				spannum();
+	// 			}else if(!inputli[this.aa].checked){
+	// 				var a=inputli[this.aa].parentNode;
+	// 				nowul.appendChild(a);
+	// 				spannum();
+	// 			}	
+	// 		}
+	// 	}	
+	// }	
+
+	// function xinzeng(content){
+	// 	var str="<li><input type='checkbox' class='inputli'><p>"+content+"</p><span>-</span></li>"
+	// 	nowul.innerHTML+=str;
+	// 	var lens=document.querySelectorAll(".now li").length;
+	// 	navspan1.innerHTML=lens;
+	// }
+	// function spannum(){
+	// 	var lens=document.querySelectorAll(".now li").length;
+	// 	var lens2=document.querySelectorAll(".nowed li").length;
+	// 	navspan1.innerHTML=lens;
+	// 	navspan2.innerHTML=lens2;
+	// }
+	// function spanclick(){
+	// 	var spanclick=document.querySelectorAll("li span");
+	// 	for(var i=0;i<spanclick.length;i++){
+	// 		spanclick[i].bb=i;
+	// 		spanclick[i].onclick=function(){
+	// 			var spanc=spanclick[this.bb].parentNode;
+	// 			var spancc=spanclick[this.bb].parentNode.parentNode;
+	// 			spancc.removeChild(spanc);
+	// 			spannum();
+	// 			ss.splice(this.aa,1);
+	// 			localStorage.setItem("content",ss);
+	// 		}
+	// 	}
+	// }
+
+
+</script>
+</html>
